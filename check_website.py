@@ -6,7 +6,7 @@ import json
 
 def check_website(url):
 
-
+    result = "FAILED"
     start_time = perf_counter()
 
     try:
