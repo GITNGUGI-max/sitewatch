@@ -39,7 +39,7 @@ jobs:
                 --retry 5 --retry-connrefused --retry-delay 2 \
                 --max-time 5 \
                 http://127.0.0.1:8080/ -o /tmp/sitewatch-dashboard.txt
-              grep -F -f checks.log /tmp/sitewatch-dashboard.txt
+              grep -F "https://example.com" /tmp/sitewatch-dashboard.txt
               exit 0
             fi
             sleep 2

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SiteWatch Dashboard</title>
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='styles.css') }}"
+  >
+</head>
+
+<body>
+  <main class="dashboard">
+    <header class="dashboard-header">
+      <div>
+        <h1>SiteWatch</h1>
+        <p>Your website monitoring dashboard</p>
+      </div>
+
+      <a href="{{ url_for('home') }}" class="refresh-button">
+        Refresh results
+      </a>
+    </header>
+
+    <section class="table-card">
+      <div class="table-header">
+        <h2>Recent checks</h2>
+        <p>Your latest 20 results, newest first.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Website</th>
+              <th scope="col">Status</th>
+              <th scope="col">Duration</th>
+              <th scope="col">Checked at</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for check in checks %}
+              <tr>
+                <td>
+                  <span class="website-link">{{ check.url }}</span>
+                </td>
+
+                <td>
+                  <span class="status {{ 'status-passed'
+                    if check.status == 'PASSED'
+                    else 'status-failed' }}">
+                    {{ check.status }}
+                  </span>
+                </td>
+
+                <td class="duration">{{ check.duration }}</td>
+                <td class="timestamp">{{ check.timestamp }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="4" class="empty-state">
+                  No checks recorded yet.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="dashboard-footer">
+      Refresh the page to view newer checks.
+    </footer>
+  </main>
+</body>
+</html>
