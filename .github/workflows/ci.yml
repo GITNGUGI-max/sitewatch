@@ -1,0 +1,58 @@
+name: SiteWatch CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Prepare configuration and log file
+        run: |
+          cp .env.example .env
+          touch checks.log
+          docker compose config --quiet
+
+      - name: Build application image
+        run: docker compose build worker
+
+      - name: Start SiteWatch
+        run: docker compose up --wait --wait-timeout 90
+
+      - name: Verify worker results on dashboard
+        run: |
+          for attempt in {1..15}; do
+            if [ -s checks.log ]; then
+              curl --fail --silent --show-error \
+                --retry 5 --retry-connrefused --retry-delay 2 \
+                --max-time 5 \
+                http://127.0.0.1:8080/ -o /tmp/sitewatch-dashboard.txt
+              grep -F -f checks.log /tmp/sitewatch-dashboard.txt
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Worker did not record any checks."
+          exit 1
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          docker compose ps -a
+          docker compose logs --no-color
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
